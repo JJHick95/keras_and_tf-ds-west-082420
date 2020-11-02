@@ -96,74 +96,9 @@ This is also a _**non-issue**_ - as you can leverage tensorflow commands within 
 
 [reference link](https://www.edureka.co/blog/keras-vs-tensorflow-vs-pytorch/)
 
-### Pair Challenge:
+# Now let's get our feet wet
 
-<img src="https://images.pexels.com/photos/1350560/pexels-photo-1350560.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260" alt="diabetes" style ="text-align:center;width:250px;float:none" ></br>
-
-Let's use a Keras neural net on the UCI digit dataset we imported from sklearn yesterday.
-
-Let's continue where we left off with our numbers dataset.
-
-We will start with a binary classification, and predict whether the number will be even or odd.
-
-In pairs, proceed through the following three parts. 
-
-#### Part 1:
-Questions to answer:
-- How many input variables are there in this dataset? 
-- What does the range of values (0-16) represent in our feature set?
-- What does a 1 mean in our target class?
-- If we use a neural net to predict this, what loss function do we use?
-***
-
-***
-#### Part 2:
-What if you wanted to create a NN with hidden layers to predict even numbers with:
-- 12 nodes in the first hidden layer
-- 8 nodes in the second hidden layer
-- relu on the first two activations
-- sigmoid on the last one
-
-Answer the following questions:
-- How many nodes in the input layer?
-- How many nodes in the output layer?
-- Will the output layer produce an integer or a float?
-***
-
-***
-
-#### Part 3:
-Knowing that you want:
-- batch size of 10
-- 50 epochs
-- to use `rmsprop` as your optimizer
-- and all the numbers you defined above...
-
-**Fill out the code below with the correct specifications, but don't run it yet**
-
-
-```python
-
-model = Sequential()
-model.add(Dense(12, activation='relu', input_dim=64,))
-model.add(Dense(8 ,  activation='relu' ))
-model.add(Dense(1 , activation = 'sigmoid' ))
-
-model.compile(optimizer='rmsprop' ,
-              loss='binary_crossentropy'  ,
-              metrics=['accuracy'])
-model.fit(X, y_binary, epochs=50, batch_size= 10 )
-```
-
-### Things to know:
-- the data and labels in `fit()` need to be numpy arrays, not pandas dfs. Else it won't work.
-- Scaling your data will have a large impact on your model.   
-   > For our traditional input features, we would use a scalar object.  For images, as long as the minimum value is 0, we can simply divide through by the maximum pixel intensity.
-
-![gif](https://media0.giphy.com/media/3og0IMJcSI8p6hYQXS/giphy.gif)
-
-
-We have come across several scenerios where scaling is important. In addition to improving the speed of gradient descent, what other scenarios did we stress scaling?
+Let's import the numbers dataset we used this morning.
 
 #### Getting data ready for modeling
 **Preprocessing**:
@@ -180,109 +115,109 @@ Since our minimum intensity is 0, we can normalize the inputs by dividing each v
 
 Now that our data is ready, let's load in the keras Sequential class.  
 
+In this lesson, we are only proceeding with feed forward models.  Our network proceeds layer by layer in sequence.
+
 Sequential refers to a sequence of layers that feed directly into one another with exactly [one input tensor and one output tensor](https://www.tensorflow.org/guide/keras/sequential_model)
 
-A dense layer receives input from every node from the previous layer.
+Now we want to specify the type for our first hidden layer.
 
-Let's start working through the different choices we can make in our network.
+To begin, we will only deal with dense layers.  Remember, dense means fully connected.  Every neuron passes a signal to every neuron in the next layer.
 
-For activation, let's start with the familiar sigmoid function, and see how it performs.
+As we will see, building neural networks is a highly empirical process.  There are numerous architectural choices to be made whose impact is hard to predict.  One has to proceed systematically, keeping track of the changes to the architure made along the way, tweeking the hyperparameters and layers until a good model is found.
 
-We can access the history of our model via `results.history`.
-Use __dict__ to take a tour.
+That being said, some aspects of our model require specific components. 
 
-We have two plots above both relating to the quality fo our model.  The left-hand plot is our loss. It uses the probabilities associated with our predictions to judge how well our prediction fits reality. We want it to decrease as far as possible.
+For our first hidden layer, we need to specify both the number of neurons in the layer, the activation function, and the dimensions of our input.
 
-The accuracy judges how well the predictions are after applying the threshold at the output layer.  We want accuracy to increase.
+Out of those three choices, which is non-negotiable?
 
-If we look at our loss, it is still decreasing. That is a signal that our model is **still learning**. If our model is still learning, we can allow it to get better by turning several dials. First, let's increase the number of epochs.
+Next, we have to specify our output layer.
 
-It still looks like our model has not **converged**. Convergence is when our model has plateaued after adjusting the parameters to their optimal values. 
+To do so, we have to choose an appropriate activation function which mirrors the sample space of our potential outcomes.
 
-The loss is still decreasing, and the accuracy is still increasing.  We could continue increasing the epochs, but that will be time consuming.  
+What activation should we use for our output layer?
 
-We could try decreasing the batch size. Let's set the batch size to 1.  This is true stochastic gradient descent.  The parameters are updated after each sample is passed into the model.
+Lastly, for this simple model, we have to define a loss function, a metric, and an optimizer.
 
-SGD with a small batch size takes longer to run through an epoch, but will take less epochs to improve.
+Optimizers are functions which update our weights in smart ways instead of treating all parameters equaly. Adam, a popular optimizer, calculates an individual learning rate for each parameter. Here is a list of available optimizers in Keras: [optimizers](https://keras.io/api/optimizers/)
 
-Comparing our 50 epoch version with a 500 batch size and a 10 epoch version with a 1 example batch size, we see that by 10 epochs, the latter has achieved 90% accuracy by the final epoch, while our 23 batch size is just about 70%.  However, with the 1 example batch, each epoch took a lot longer.
+We specify these parameters in the compile method.
 
-Still, even though the 2nd model reached a higher accuracy and lower loss, it looks like it still has not stopped learning. The slope of the loss is getting smaller, but it has not leveled out completely.
+Looking back at this morning's lecture, what loss function should we use?
 
-From yesterday's lesson, you may remember that the vanilla SGD optimizer applies a constant learning rate accross all values.  Let's look at the default value.  
+Now we can fit our model in a similar way as we did our sklearn models, using a .fit method.
 
-If we increase the learning rate, our parameter adjustments will take bigger steps, allowing us to proceed more quickly down the gradient.
+Before we do so, we have to convert out target values with a One Hot Encoder, which is the form Keras requires. 
 
-If we increase the learning rate to a very high number, we see that our model overshoots the minimum, and starts bouncing all around.
+How did we do? Keras behaves in a way which makes replication across computers difficult, even if we were to add a random seed.  In other words may get slightly varying results.
 
-Let's get a bit more modern, and apply a relu activation function in our layers.
+The model once fit now has the ability to both predict and predict_classes
 
-Compared to our original sigmoid with 50 epochs and batch 32, the relu activation reaches a much higher accuracy
+Instead of checking the performance on val each time with the above methods, we can score our validation data along with the training data by passing it as a tuple as the validation_data parameter in our .fit 
 
-Let's try batch size 1
+But first, we have to transform y_val like we did y_t.
 
-We are reaching a high accuracy, but still looks like our model has not converged. If we increased our number of epochs, we would be looking at a long wait.
+How did we do on the validation data?
 
-We have been implementing the vanilla version of gradient descent.  Remember, SGD updates the parameters uniformly across the board.  Let's try out an optimizer used more often these days.
+Now that we have our input and output layers set, let's try to boost our accuracy.
 
-Now our accuracy is really improving, and it looks like our learning may be leveling out.
+To begin, let's allow our algorithm to train for a longer.  To do so, we increase the epochs using the `epochs` parameter in .fit(). Let's change it to 5.
 
-Since Adam and relu are relatively faster than SGD and sigmoid, we can add more epochs, and more layers without the training time getting unwieldy.
+Now our loss is going down and accuracy is going up a bit. 
 
-No it looks like we're getting somewhere.
+Let's plot our loss across epochs. In order to do that, we have to store the results of our model.
 
-For comparison, look at how much more quickly Adam learns than SGD.
 
-We have been looking only at our training set. Let's add in our validation set to the picture.
+We can track the loss and accuracy from each epoch to get a sense of our model's progress.
 
-Consider that we still see our loss decreasing and our accuracy increasing.  We try to add more complexity to our model by adding more layers.
+Our goal in modeling is to minimize the loss while maximizing accuracy. Remember, our models don't actually optimize for the metric we assign: they learn by minimizing the loss.  We can get a sense as to whether our model has converged on a minimim by seeing whether our loss has stopped decreasing.  The plots of epochs vs loss will level off.
 
-In both models above, we see that our loss has begun to increase slightly. 
+With this goal in mind, let's start testing out some different architectures and parameters.
+Remember, this is an empirical process.  We experiment with educated guesses as to what may improve our model's performance.
 
-This is a sign that our model is overfit.  Just like in our previous models, after a certain amount of learning, the loss on the validation set starts increasing.
+A first logical step would be to allow our model to learn for a longer.
+
+Instead of adding more epochs, let's deepen our network by adding another hidden layer. It is a good idea to try out deep networks, since we know that successive layers find increasingly complex patterns.
+
+Without knowing, we have been performing batch gradient descent.  Let's try out mini-batch gradient descent.
+
+To do so, we add a batch size to our fit.
+
+As a favorite blogger, Jason Brownlee suggests:
+
+Mini-batch sizes, commonly called “batch sizes” for brevity, are often tuned to an aspect of the computational architecture on which the implementation is being executed. Such as a power of two that fits the memory requirements of the GPU or CPU hardware like 32, 64, 128, 256, and so on. [source](https://machinelearningmastery.com/gentle-introduction-mini-batch-gradient-descent-configure-batch-size/)
+
+We can also try true stochastic gradient descent by specifying 1 as the batch size.
+
+Since a SGD batchsize seems to work well, but takes a relatively long time, let's try a slightly bigger batch size of 5 and boost the epochs to 50.  Hopefully, this will allow us to achieve similarly good results as SGD, but in a reasonable amount of time.
+
+Now we're talking.  We are beginnig to see a leveling off of our validation loss, indicating that we may be close to converging on a minimum.
+
+But as you may notice, the validation loss is beginning to separate from the training loss.
+
+Let's run this a bit longer, and see what happens
+
+If this model is behaving at all like it was for me last night, we are beginning to experience some overfitting.  Your val loss may have even started increasing.
 
 # Regularization
 
+In order to combat overfitting, we have several regularization techniques to employ.  In the present case, the most intuitive choice is early stopping.
 
-Does regularization make sense in the context of neural networks? <br/>
+## Early Stopping
+For early stopping, we allow our model to run until some condition is met. 
 
-Yes! We still have all of the salient ingredients: a loss function, overfitting vs. underfitting, and coefficients (weights) that could get too large.
+One practical way to do this is monitoring the validation loss. 
 
-But there are now a few different flavors besides L1 and L2 regularization. (Note that L1 regularization is not common in the context of  neural networks.)
+We can set-up early stopping to stop our model whenever it sees an increase in validation loss by setting min_delta to a very low number and patience to 0.  Increasing the patience waits a specified number of epochs without improvement of the monitored value.  Increasing the patience in effect allows for abberations protecting against the case that a given epoch, by random chance, led to a worse metric.  If we see a decrease in score across multiple epochs in a row, we can be fairly certain more training of our network will only result in overfitting.
 
-# Dropout
+# Drop Out Layers
+
+Although the final two regularization techniques make less sense in our present case, since overfitting only occurs late in our training, we have two other common regularization techniques.
+
+We can add dropout layers to our model.  
 
 We can specify a dropout layer in keras, which randomly shuts off different nodes during training.
 
 ![drop_out](img/drop_out.png)
 
-# Early Stopping
-
-We can also tell our neural network to stop once it stops realizing any gain.
-
-This is the model with no early stopping.
-
-Here we tell it to stop once the a very small positive change in the validation loss occurs.
-
-That stopped too early.  We can specify the number of epochs that it doesn't see decrease in the loss with the `patience` parameter. 
-
-# Multiclass Classification and Softmax
-
-Now let's return to the original problem: predicting 0 through 9
-
-What is different in the code below from the code above?
-
-$$\large \text{Softmax}(x_{i}) = \frac{\exp(x_i)}{\sum_j \exp(x_j)}$$
-
-The sofmax function outputs a number between 0 and 1 for each of our classes.  All of the probabilities of the classes sum up to 1.
-
-The number of nodes in our output layer equals the number of categories in our dataset.
-
-We also need a new loss function categorical crossentropy, which calculates separate loss for each label and sums the results.
-
-Wow, look at that performance!  
-
-That is great, but remember, we were dealing with simple black and white images.  With color, our basic neural net will have less success.
-
-We will explore more advanced tools in the coming days.
-
+We can also add L1 and L2 regularization
